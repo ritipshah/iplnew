@@ -1,28 +1,61 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <title>IPL Auction</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
-<body class="bg-gray-900 text-white p-10">
+<body class="bg-gray-900 text-white min-h-screen p-10">
 
 
 {% if page == "dashboard" %}
 
-<h1 class="text-4xl mb-6 text-center">IPL Auction Dashboard</h1>
+<h1 class="text-4xl text-center mb-8 font-bold">
+🏏 IPL Auction Dashboard
+</h1>
 
-<table class="table-auto w-full bg-gray-800 rounded-xl">
+
+<div class="flex justify-center mb-6">
+
+<form method="GET" action="/dashboard" class="flex gap-3">
+
+<input
+type="text"
+name="search"
+placeholder="Search Player"
+class="p-2 rounded text-black"
+/>
+
+<button class="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+Search
+</button>
+
+</form>
+
+<a href="/logout" class="ml-6 bg-red-500 px-4 py-2 rounded hover:bg-red-600">
+Logout
+</a>
+
+</div>
+
+
+
+<div class="flex justify-center">
+
+<table class="table-auto w-3/4 bg-gray-800 rounded-xl overflow-hidden">
 
 <thead class="bg-gray-700">
 
 <tr>
+
 <th class="p-3">Player</th>
 <th class="p-3">Role</th>
 <th class="p-3">Country</th>
 <th class="p-3">Current Bid</th>
 <th class="p-3">Action</th>
+
 </tr>
 
 </thead>
@@ -34,15 +67,24 @@
 <tr class="border-b border-gray-700 hover:bg-gray-700">
 
 <td class="p-3">{{player.name}}</td>
-<td class="p-3">{{player.role}}</td>
-<td class="p-3">{{player.country}}</td>
-<td class="p-3 text-green-400">₹{{player.current_bid}}</td>
+
+<td class="p-3 text-purple-400">
+{{player.role}}
+</td>
+
+<td class="p-3">
+{{player.country}}
+</td>
+
+<td class="p-3 text-green-400 font-semibold">
+₹{{player.current_bid}}
+</td>
 
 <td class="p-3">
 
 <a href="/player/{{player.id}}">
 
-<button class="bg-blue-500 px-3 py-1 rounded">
+<button class="bg-blue-500 px-3 py-1 rounded hover:bg-blue-600">
 View Player
 </button>
 
@@ -58,33 +100,46 @@ View Player
 
 </table>
 
+</div>
+
 {% endif %}
 
 
 
 {% if page == "player" %}
 
-<h1 class="text-3xl mb-6">{{player.name}}</h1>
+<div class="flex justify-center">
 
-<div class="bg-gray-800 p-6 rounded-xl w-96">
+<div class="bg-gray-800 p-8 rounded-xl w-96 text-center">
 
-<p>Role: {{player.role}}</p>
-<p>Country: {{player.country}}</p>
-<p>Runs: {{player.runs}}</p>
-<p>Strike Rate: {{player.strike_rate}}</p>
+<h1 class="text-3xl mb-4 font-bold">
+{{player.name}}
+</h1>
 
-<p class="text-xl mt-3 text-green-400">
+<p class="mb-2">Role: <span class="text-purple-400">{{player.role}}</span></p>
+
+<p class="mb-2">Country: {{player.country}}</p>
+
+<p class="mb-2">Runs: {{player.runs}}</p>
+
+<p class="mb-2">Strike Rate: {{player.strike_rate}}</p>
+
+<p class="text-green-400 text-xl mb-4">
 Current Bid: ₹{{player.current_bid}}
 </p>
 
-<form action="/bid/{{player.id}}" method="POST" class="mt-4">
+<form action="/bid/{{player.id}}" method="POST">
 
-<input type="number"
+<input
+type="number"
 name="bid"
 placeholder="Enter Bid"
-class="text-black p-2 rounded">
+class="p-2 rounded text-black"
+/>
 
-<button class="bg-green-500 px-4 py-2 rounded ml-2">
+<br><br>
+
+<button class="bg-green-500 px-4 py-2 rounded hover:bg-green-600">
 Place Bid
 </button>
 
@@ -92,15 +147,20 @@ Place Bid
 
 <br>
 
-<a href="/">
-<button class="bg-gray-600 px-3 py-1 rounded">
-Back to Dashboard
+<a href="/dashboard">
+
+<button class="bg-gray-600 px-3 py-1 rounded hover:bg-gray-500">
+Back
 </button>
+
 </a>
 
 </div>
 
+</div>
+
 {% endif %}
+
 
 </body>
 </html>

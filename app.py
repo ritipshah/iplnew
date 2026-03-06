@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import os
 
 app = Flask(__name__)
+
+app.secret_key = "secretkey"
 
 # -----------------------------
 # DATABASE CONFIGURATION
@@ -21,7 +23,7 @@ db = SQLAlchemy(app)
 
 
 # -----------------------------
-# DATABASE MODEL
+# DATABASE MODELS
 # -----------------------------
 
 class Player(db.Model):
@@ -39,8 +41,17 @@ class Player(db.Model):
     current_bid = db.Column(db.Integer)
 
 
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    username = db.Column(db.String(100), unique=True)
+
+    password = db.Column(db.String(100))
+
+
 # -----------------------------
-# LOAD DATASET INTO DATABASE
+# LOAD DATASET
 # -----------------------------
 
 with app.app_context():
@@ -49,10 +60,9 @@ with app.app_context():
 
     if Player.query.count() == 0:
 
-        # Correct CSV path for Render
         csv_path = os.path.join(os.path.dirname(__file__), "ipl_dataset.csv")
 
-        df = pd.read_csv(csv_path, encoding="utf-8")
+        df = pd.read_csv(csv_path)
 
         for _, row in df.iterrows():
 
@@ -72,19 +82,72 @@ with app.app_context():
 
 
 # -----------------------------
+# LOGIN PAGE
+# -----------------------------
+
+@app.route("/", methods=["GET","POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        user = User.query.filter_by(username=username, password=password).first()
+
+        if user:
+
+            session["user"] = username
+
+            return redirect("/dashboard")
+
+        else:
+
+            return "Invalid Login"
+
+    return render_template("login.html")
+
+
+# -----------------------------
+# REGISTER PAGE
+# -----------------------------
+
+@app.route("/register", methods=["GET","POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        user = User(username=username, password=password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect("/")
+
+    return render_template("register.html")
+
+
+# -----------------------------
 # DASHBOARD
 # -----------------------------
 
-@app.route("/")
+@app.route("/dashboard")
 def dashboard():
 
-    players = Player.query.order_by(Player.current_bid.desc()).all()
+    search = request.args.get("search")
 
-    return render_template(
-        "app.html",
-        players=players,
-        page="dashboard"
-    )
+    if search:
+
+        players = Player.query.filter(Player.name.contains(search)).all()
+
+    else:
+
+        players = Player.query.order_by(Player.current_bid.desc()).all()
+
+    return render_template("app.html", players=players, page="dashboard")
 
 
 # -----------------------------
@@ -94,13 +157,9 @@ def dashboard():
 @app.route("/player/<int:id>")
 def player_page(id):
 
-    player = Player.query.get_or_404(id)
+    player = Player.query.get(id)
 
-    return render_template(
-        "app.html",
-        player=player,
-        page="player"
-    )
+    return render_template("app.html", player=player, page="player")
 
 
 # -----------------------------
@@ -110,20 +169,31 @@ def player_page(id):
 @app.route("/bid/<int:id>", methods=["POST"])
 def bid(id):
 
-    player = Player.query.get_or_404(id)
+    player = Player.query.get(id)
 
     bid_amount = int(request.form["bid"])
 
     if bid_amount > player.current_bid:
+
         player.current_bid = bid_amount
         db.session.commit()
+
+    return redirect("/dashboard")
+
+
+# -----------------------------
+# LOGOUT
+# -----------------------------
+
+@app.route("/logout")
+def logout():
+
+    session.pop("user", None)
 
     return redirect("/")
 
 
 # -----------------------------
-# RUN APP (LOCAL ONLY)
-# -----------------------------
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run()
