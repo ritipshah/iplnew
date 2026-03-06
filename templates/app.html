@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>IPL Auction</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white p-10">
+
+
+{% if page == "dashboard" %}
+
+<h1 class="text-4xl mb-6 text-center">IPL Auction Dashboard</h1>
+
+<table class="table-auto w-full bg-gray-800 rounded-xl">
+
+<thead class="bg-gray-700">
+
+<tr>
+<th class="p-3">Player</th>
+<th class="p-3">Role</th>
+<th class="p-3">Country</th>
+<th class="p-3">Current Bid</th>
+<th class="p-3">Action</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for player in players %}
+
+<tr class="border-b border-gray-700 hover:bg-gray-700">
+
+<td class="p-3">{{player.name}}</td>
+<td class="p-3">{{player.role}}</td>
+<td class="p-3">{{player.country}}</td>
+<td class="p-3 text-green-400">₹{{player.current_bid}}</td>
+
+<td class="p-3">
+
+<a href="/player/{{player.id}}">
+
+<button class="bg-blue-500 px-3 py-1 rounded">
+View Player
+</button>
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endif %}
+
+
+
+{% if page == "player" %}
+
+<h1 class="text-3xl mb-6">{{player.name}}</h1>
+
+<div class="bg-gray-800 p-6 rounded-xl w-96">
+
+<p>Role: {{player.role}}</p>
+<p>Country: {{player.country}}</p>
+<p>Runs: {{player.runs}}</p>
+<p>Strike Rate: {{player.strike_rate}}</p>
+
+<p class="text-xl mt-3 text-green-400">
+Current Bid: ₹{{player.current_bid}}
+</p>
+
+<form action="/bid/{{player.id}}" method="POST" class="mt-4">
+
+<input type="number"
+name="bid"
+placeholder="Enter Bid"
+class="text-black p-2 rounded">
+
+<button class="bg-green-500 px-4 py-2 rounded ml-2">
+Place Bid
+</button>
+
+</form>
+
+<br>
+
+<a href="/">
+<button class="bg-gray-600 px-3 py-1 rounded">
+Back to Dashboard
+</button>
+</a>
+
+</div>
+
+{% endif %}
+
+</body>
+</html>
